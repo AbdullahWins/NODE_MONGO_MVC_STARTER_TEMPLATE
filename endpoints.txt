@@ -1,0 +1,18 @@
+Author: https://github.com/abdullahwins
+BaseUrl: https://jazakallahbackend.onrender.com
+
+//hadith
+router.get("/hadiths/all", getAllHadiths);
+router.get("/hadiths/find/:id", getOneHadith);
+router.get("/hadiths/type/:type", getHadithsByType);
+router.post("/hadiths/add", addOneHadith); = { hadithName, narratedBy, referenceBook, categoryArabic, categoryEnglish, categoryTurkish, categoryUrdu, hadithArabic, hadithEnglish, hadithTurkish, hadithUrdu } 
+router.patch("/hadiths/update/:id", updateHadithById);
+router.delete("/hadiths/delete/:id", deleteOneHadithById);
+
+//hadith category
+router.get("/hadithCategories/all", getAllHadithCategories);
+router.get("/hadithCategories/find/:id", getOneHadithCategory);
+router.get("/hadithCategories/type/:type", getHadithCategoriesByType);
+router.post("/hadithCategories/add", addOneHadithCategory); = { categoryArabic, categoryEnglish, categoryTurkish, categoryUrdu } 
+router.patch("/hadithCategories/update/:id", updateHadithCategoryById);
+router.delete("/hadithCategories/delete/:id", deleteOneHadithCategoryById);
