@@ -1,1 +1,1 @@
-#Nodejs Boilerplate MVC Using Mongodd as primary database!
+#Nodejs Boilerplate MVC Using Mongodb as primary database!
