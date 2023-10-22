@@ -143,14 +143,14 @@ const addOneAdmin = async (req, res) => {
 const updateAdminById = async (req, res) => {
   try {
     const id = req.params.id;
-    //object id validation
+    // Object ID validation
     if (!ObjectId.isValid(id)) {
       console.log("Invalid ObjectId:", id);
       return res.status(400).send({ message: "Invalid ObjectId" });
     }
     const query = { _id: new ObjectId(id) };
     const { files } = req;
-    const data = JSON.parse(req?.body?.data);
+    const data = req.body.data ? JSON.parse(req.body.data) : {};
     const { password, ...additionalData } = data;
     const folderName = "admins";
     let updateData = {};
@@ -160,19 +160,23 @@ const updateAdminById = async (req, res) => {
       const fileUrl = fileUrls[0];
       updateData = { ...updateData, fileUrl };
     }
+
     if (password) {
       const hashedPassword = await bcrypt.hash(password, 10);
       updateData = { ...updateData, password: hashedPassword };
     }
-    if (additionalData) {
+
+    if (Object.keys(additionalData).length > 0) {
       updateData = { ...updateData, ...additionalData };
     }
+
     const result = await adminsCollection.updateOne(query, {
       $set: updateData,
     });
+
     if (result?.modifiedCount === 0) {
-      console.log("Unable to update admin:", id);
-      res.status(404).send({ message: "Unable to update admin!" });
+      console.log("No modifications were made:", id);
+      res.status(404).send({ message: "No modifications were made!" });
     } else {
       console.log("admin updated:", id);
       res.send(updateData);

@@ -151,14 +151,14 @@ const addOneUser = async (req, res) => {
 const updateUserById = async (req, res) => {
   try {
     const id = req.params.id;
-    //object id validation
+    // Object ID validation
     if (!ObjectId.isValid(id)) {
       console.log("Invalid ObjectId:", id);
       return res.status(400).send({ message: "Invalid ObjectId" });
     }
     const query = { _id: new ObjectId(id) };
     const { files } = req;
-    const data = JSON.parse(req?.body?.data);
+    const data = req.body.data ? JSON.parse(req.body.data) : {};
     const { password, ...additionalData } = data;
     const folderName = "users";
     let updateData = {};
@@ -168,22 +168,27 @@ const updateUserById = async (req, res) => {
       const fileUrl = fileUrls[0];
       updateData = { ...updateData, fileUrl };
     }
+
     if (password) {
       const hashedPassword = await bcrypt.hash(password, 10);
       updateData = { ...updateData, password: hashedPassword };
     }
-    if (additionalData) {
+
+    if (Object.keys(additionalData).length > 0) {
       updateData = { ...updateData, ...additionalData };
     }
+
     const result = await usersCollection.updateOne(query, {
       $set: updateData,
     });
+
     if (result?.modifiedCount === 0) {
-      console.log("Unable to update user:", id);
-      res.send({ message: "Unable to update user:", id });
+      console.log("No modifications were made:", id);
+      res.status(404).send({ message: "No modifications were made!" });
+    } else {
+      console.log("User updated:", id);
+      res.send(updateData);
     }
-    console.log(result);
-    res.send(result);
   } catch (err) {
     console.error(err);
     res.status(500).send({ message: "Failed to update user" });
