@@ -6,7 +6,7 @@ const jwt = require("jsonwebtoken");
 const { adminsCollection } = require("../../config/database/db");
 const AdminModel = require("../models/AdminModel");
 const { SendEmail } = require("../services/email/SendEmail");
-const { uploadFiles } = require("../utilities/uploadFile");
+const { uploadMultipleFiles } = require("../utilities/fileUploader");
 
 // login
 const LoginAdmin = async (req, res) => {
@@ -24,7 +24,7 @@ const LoginAdmin = async (req, res) => {
     }
     const expiresIn = "7d";
     const token = jwt.sign(
-      { adminId: admin?.email },
+      { email: admin?.email },
       process.env.JWT_TOKEN_SECRET_KEY,
       { expiresIn }
     );
@@ -96,14 +96,19 @@ const getAdminsByType = async (req, res) => {
 const getOneAdmin = async (req, res) => {
   try {
     const adminId = req.params.id;
+    //object id validation
+    if (!ObjectId.isValid(adminId)) {
+      console.log("Invalid ObjectId:", adminId);
+      return res.status(400).send({ message: "Invalid ObjectId" });
+    }
     const admin = await adminsCollection.findOne({
       _id: new ObjectId(adminId),
     });
     if (!admin) {
       res.status(404).send({ message: "admin not found" });
     } else {
-      res.send(admin);
       console.log(admin);
+      res.send(admin);
     }
   } catch (err) {
     console.error(err);
@@ -126,9 +131,8 @@ const addOneAdmin = async (req, res) => {
       email,
       hashedPassword,
     });
+    console.log(newAdmin);
     res.status(201).json(newAdmin);
-    console.log(newAdmin);
-    console.log(newAdmin);
   } catch (err) {
     console.error(err);
     res.status(500).send({ message: "Failed to create new admin" });
@@ -139,6 +143,11 @@ const addOneAdmin = async (req, res) => {
 const updateAdminById = async (req, res) => {
   try {
     const id = req.params.id;
+    //object id validation
+    if (!ObjectId.isValid(id)) {
+      console.log("Invalid ObjectId:", id);
+      return res.status(400).send({ message: "Invalid ObjectId" });
+    }
     const query = { _id: new ObjectId(id) };
     const { files } = req;
     const data = JSON.parse(req?.body?.data);
@@ -147,7 +156,7 @@ const updateAdminById = async (req, res) => {
     let updateData = {};
 
     if (files?.length > 0) {
-      const fileUrls = await uploadFiles(files, folderName);
+      const fileUrls = await uploadMultipleFiles(files, folderName);
       const fileUrl = fileUrls[0];
       updateData = { ...updateData, fileUrl };
     }
@@ -161,8 +170,13 @@ const updateAdminById = async (req, res) => {
     const result = await adminsCollection.updateOne(query, {
       $set: updateData,
     });
-    console.log(result);
-    res.send(result);
+    if (result?.modifiedCount === 0) {
+      console.log("Unable to update admin:", id);
+      res.status(404).send({ message: "Unable to update admin!" });
+    } else {
+      console.log("admin updated:", id);
+      res.send(updateData);
+    }
   } catch (err) {
     console.error(err);
     res.status(500).send({ message: "Failed to update admin" });
@@ -257,6 +271,11 @@ const updateAdminPasswordByOldPassword = async (req, res) => {
 const deleteAdminById = async (req, res) => {
   try {
     const id = req.params.id;
+    //object id validation
+    if (!ObjectId.isValid(id)) {
+      console.log("Invalid ObjectId:", id);
+      return res.status(400).send({ message: "Invalid ObjectId" });
+    }
     const query = { _id: new ObjectId(id) };
     const result = await adminsCollection.deleteOne(query);
     if (result?.deletedCount === 0) {
@@ -264,7 +283,7 @@ const deleteAdminById = async (req, res) => {
       res.send("no admin found with this id!");
     } else {
       console.log("admin deleted:", id);
-      res.send(result);
+      res.send({ message: "admin deleted successfully with id: " + id });
     }
   } catch (err) {
     console.error(err);

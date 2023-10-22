@@ -22,7 +22,7 @@ router.post("/users/login", LoginUser);
 router.post("/users/register", RegisterUser);
 router.post("/users/reset", sendPasswordResetLink);
 router.patch("/users/reset", updateUserPasswordByEmail);
-router.patch("/users/edit/:id", updateUserById);
+router.patch("/users/update/:id", updateUserById);
 router.patch("/users/resetpassword/:email", updateUserPasswordByOldPassword);
 router.delete("/users/delete/:id", deleteUserById);
 

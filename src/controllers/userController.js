@@ -9,7 +9,7 @@ const {
   usersCollection,
   stripesCollection,
 } = require("../../config/database/db");
-const { uploadFiles } = require("../utilities/uploadFile");
+const { uploadMultipleFiles } = require("../utilities/fileUploader");
 
 //login
 const LoginUser = async (req, res) => {
@@ -27,7 +27,7 @@ const LoginUser = async (req, res) => {
     }
     const expiresIn = "7d";
     const token = jwt.sign(
-      { userId: user?.email },
+      { email: user?.email },
       process.env.JWT_TOKEN_SECRET_KEY,
       { expiresIn }
     );
@@ -113,8 +113,8 @@ const getOneUser = async (req, res) => {
     if (!user) {
       res.status(404).send({ message: "user not found" });
     } else {
-      res.send(user);
       console.log(user);
+      res.send(user);
     }
   } catch (err) {
     console.error(err);
@@ -164,7 +164,7 @@ const updateUserById = async (req, res) => {
     let updateData = {};
 
     if (files?.length > 0) {
-      const fileUrls = await uploadFiles(files, folderName);
+      const fileUrls = await uploadMultipleFiles(files, folderName);
       const fileUrl = fileUrls[0];
       updateData = { ...updateData, fileUrl };
     }
@@ -178,6 +178,10 @@ const updateUserById = async (req, res) => {
     const result = await usersCollection.updateOne(query, {
       $set: updateData,
     });
+    if (result?.modifiedCount === 0) {
+      console.log("Unable to update user:", id);
+      res.send({ message: "Unable to update user:", id });
+    }
     console.log(result);
     res.send(result);
   } catch (err) {
@@ -285,7 +289,7 @@ const deleteUserById = async (req, res) => {
       res.send("no user found with this id!");
     } else {
       console.log("user deleted:", id);
-      res.send(result);
+      res.send({ message: "user deleted successfully with id:" + id });
     }
   } catch (err) {
     console.error(err);

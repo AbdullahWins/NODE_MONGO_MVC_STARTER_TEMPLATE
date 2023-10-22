@@ -9,8 +9,8 @@ const app = express();
 //middleware
 // app.use(express.json());
 app.use(cors());
-app.use(multer({ dest: "uploads/" }).single("file"));
-// app.use(multer({ dest: "uploads/" }).array("files", 10));
+// app.use(multer({ dest: "uploads/" }).single("file"));
+app.use(multer({ dest: "uploads/" }).array("files", 10));
 dotenv.config();
 const port = process.env.SERVER_PORT || 5000;
 

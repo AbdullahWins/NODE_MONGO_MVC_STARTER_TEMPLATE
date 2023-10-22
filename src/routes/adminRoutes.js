@@ -23,7 +23,7 @@ router.post("/admins/register", RegisterAdmin);
 router.post("/admins/login", LoginAdmin);
 router.post("/admins/reset", sendPasswordResetLink);
 router.patch("/admins/reset", updateAdminPasswordByEmail);
-router.patch("/admins/edit/:id", authenticateToken, updateAdminById);
+router.patch("/admins/update/:id", authenticateToken, updateAdminById);
 router.patch("/admins/resetpassword/:email", updateAdminPasswordByOldPassword);
 router.delete("/admins/delete/:id", deleteAdminById);
 
